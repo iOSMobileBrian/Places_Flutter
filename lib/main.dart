@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,6 +29,22 @@ class _HomePageState extends State<HomePage> {
   Completer<GoogleMapController> _controller = Completer();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+
+
+  Future<void>_onMapCreated(GoogleMapController controller) async {
+
+    _controller.complete(controller);
+
+    final position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high,locationPermissionLevel: GeolocationPermission.location);
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(position.latitude,position.longitude),zoom: 14),),);
+
+  }
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       
@@ -37,12 +54,10 @@ class _HomePageState extends State<HomePage> {
       body: Stack(
         children: [
           GoogleMap(
-            onMapCreated: (GoogleMapController controller){
-
-              _controller.complete(controller);
-
-            },
-              initialCameraPosition: CameraPosition(target: LatLng(44.850120, -74.303420),zoom: 14),),
+            myLocationEnabled: true,
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(target: LatLng(44.850120, -74.303420),zoom: 14),
+          ),
         ],
       ),
     );
